@@ -1,0 +1,2 @@
+rootProject.name='Flickr Search'
+include ':app'
