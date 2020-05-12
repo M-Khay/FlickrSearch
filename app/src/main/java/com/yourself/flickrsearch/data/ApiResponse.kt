@@ -4,5 +4,5 @@ import com.google.gson.annotations.SerializedName
 
 data class ApiResponse(
     @SerializedName("photos")
-    var photos: Photos
+    var userPost: UserPost
 )

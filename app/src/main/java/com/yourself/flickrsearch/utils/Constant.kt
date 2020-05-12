@@ -7,5 +7,6 @@ object Constant {
     const val CONTENT_TYPE = 1 // to get only images in result
     const val FORMAT = "json"
     const val NO_JSON_CALLBACK = 1
+    const val  IMAGES_PER_PAGE= 10
 
 }

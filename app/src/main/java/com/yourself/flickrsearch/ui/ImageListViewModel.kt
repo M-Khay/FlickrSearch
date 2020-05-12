@@ -26,18 +26,17 @@ class ImageListViewModel : ViewModel() {
     }
 
     fun getImageListFor(searchTerm: String, pageNumber: Int = 1) {
-        if (pageNumber == 1)
-            imageListState.value = Loading(true)
+        imageListState.value = Loading(true)
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val result = repository.getImageListWith(searchTerm, pageNumber)
                 withContext(Dispatchers.Main) {
-                    if (result.photos.pages.toInt() != 0) {
-                        imageListState.value = Success(result.photos.imageList, false)
+                    if (result.userPost.pages.toInt() != 0) {
+                        imageListState.value = Success(result.userPost.imageList, false)
                     } else {
                         imageListState.value = Error(null, false)
                     }
-                    totalPages = result.photos.pages.toInt()
+                    totalPages = result.userPost.pages.toInt()
                 }
             } catch (exception: Exception) {
                 Log.d(TAG, "Error from API ${exception.localizedMessage}")

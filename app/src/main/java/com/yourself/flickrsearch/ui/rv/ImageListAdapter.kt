@@ -4,9 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.yourself.flickrsearch.data.Image
-import com.yourself.flickrsearch.data.Photos
 import com.yourself.flickrsearch.databinding.ImageListItemBinding
-import com.yourself.flickrsearch.ui.ImageListViewModel
 
 
 class ImageListAdapter :

@@ -33,13 +33,18 @@ class ImageListFragment : Fragment() {
 
     private lateinit var viewModel: ImageListViewModel
     private lateinit var adapter: ImageListAdapter
+    private lateinit var onScrollListener: EndlessRecyclerViewScrollListener
 
     companion object {
         val TAG = ImageListFragment::class.java.name
         fun newInstance() = ImageListFragment()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_image_list, container, false)
     }
@@ -50,7 +55,7 @@ class ImageListFragment : Fragment() {
             ComponentInjector.component.inject(it)
         }
 
-        viewModel.imageListState.observe(this.viewLifecycleOwner, teamListObserver)
+
         search_go.setOnClickListener {
             searchImages()
         }
@@ -62,13 +67,18 @@ class ImageListFragment : Fragment() {
             }
             true
         }
+        viewModel.imageListState.observe(this.viewLifecycleOwner, imageListObserver)
+        setupRecyclerView()
+    }
+
+    private fun setupRecyclerView() {
         adapter = ImageListAdapter()
         rv_image_list.apply {
             layoutManager = LinearLayoutManager(activity)
             adapter = this@ImageListFragment.adapter
         }
 
-        val onScrollListener = object :
+         onScrollListener = object :
             EndlessRecyclerViewScrollListener(rv_image_list.layoutManager as LinearLayoutManager?) {
             override fun onLoadMore(page: Int, totalItemsCount: Int, view: RecyclerView) {
                 // Triggered only when new data needs to be appended to the list
@@ -85,24 +95,10 @@ class ImageListFragment : Fragment() {
         )
     }
 
-    private fun searchMoreImages(pageNumber: Int) {
-        if (pageNumber < viewModel.totalPages) {
-            val searchText = search_text.text.toString()
-            if (NetworkConnectivity.isNetworkConnected) {
-                viewModel.getImageListFor(searchText, pageNumber)
-                Log.d(TAG, "Searched Team : $searchText")
-            } else {
-                showAlertDialog(
-                    resources.getString(R.string.network_error_title),
-                    resources.getString(R.string.network_error_message),
-                    resources.getString(R.string.alert_dialog_ok)
-                )
-            }
-        }
-    }
 
     private fun searchImages() {
         hideKeyboard()
+        clearPreviousSearchedData()
         adapter.clearLastSearchedItems()
         val searchText = search_text.text.toString()
         if (TextUtils.isEmpty(searchText)) {
@@ -123,8 +119,27 @@ class ImageListFragment : Fragment() {
         }
     }
 
+    private fun clearPreviousSearchedData() {
+        adapter.clearLastSearchedItems()
+        onScrollListener.resetState()
+    }
 
-    private val teamListObserver = Observer<ApiResult<List<Image>>> { state ->
+    private fun searchMoreImages(pageNumber: Int) {
+        if (pageNumber < viewModel.totalPages) {
+            val searchText = search_text.text.toString()
+            if (NetworkConnectivity.isNetworkConnected) {
+                viewModel.getImageListFor(searchText, pageNumber)
+            } else {
+                showAlertDialog(
+                    resources.getString(R.string.network_error_title),
+                    resources.getString(R.string.network_error_message),
+                    resources.getString(R.string.alert_dialog_ok)
+                )
+            }
+        }
+    }
+
+    private val imageListObserver = Observer<ApiResult<List<Image>>> { state ->
         when (state) {
             is Success<List<Image>> -> {
                 loading_content.visibility = View.GONE
@@ -132,7 +147,6 @@ class ImageListFragment : Fragment() {
                 adapter.updateImageList(state.data)
             }
             is Loading -> {
-                rv_image_list.visibility = View.GONE
                 loading_content.visibility = View.VISIBLE
             }
             is Error -> {
@@ -158,7 +172,7 @@ class ImageListFragment : Fragment() {
         keyboard.hideSoftInputFromWindow(view?.windowToken, 0)
     }
 
-    fun gotoListTop(){
+    fun gotoListTop() {
         rv_image_list.smoothScrollToPosition(0)
     }
 

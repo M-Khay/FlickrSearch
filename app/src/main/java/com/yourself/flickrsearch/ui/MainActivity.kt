@@ -42,8 +42,5 @@ class MainActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    override fun showHideActionBarWith(title: String?, showBackButton: Boolean) {
-
-    }
 
 }
